@@ -1,0 +1,31 @@
+plugins {
+    id 'java'
+}
+
+group 'com.atmbiz'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    implementation files('libs/batm_server_extensions_api.jar')
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.0.1'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    implementation group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0'
+    compile(group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.9')
+    compile(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.9')
+    compile(group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.9')
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    archiveBaseName = 'atmbiz'
+    archiveVersion =  '0.1.0'
+}
