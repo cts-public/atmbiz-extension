@@ -15,6 +15,8 @@ public class AtmbizSellCryptoRequest {
     private String cryptoCurrency;
     private String identityPublicId;
     private String discountCode;
+    private String oswApiKey;
+    private String hmac;
 
     public String getPhoneNumber() {
         return phoneNumber;
@@ -86,5 +88,21 @@ public class AtmbizSellCryptoRequest {
 
     public void setDiscountCode(String discountCode) {
         this.discountCode = discountCode;
+    }
+
+    public String getOswApiKey() {
+        return oswApiKey;
+    }
+
+    public void setOswApiKey(String oswApiKey) {
+        this.oswApiKey = oswApiKey;
+    }
+
+    public String getHmac() {
+        return hmac;
+    }
+
+    public void setHmac(String hmac) {
+        this.hmac = hmac;
     }
 }

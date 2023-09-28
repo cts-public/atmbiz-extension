@@ -1,7 +1,7 @@
 # **Atmbiz**
 ## project structure
 
-* roject structure consists of `AtmbizExtension` class which is extension of 
+* project structure consists of `AtmbizExtension` class which is extension of 
 `com.generalbytes.batm.server.extension.AbstractExtensions` located in `com.atmbiz.extensions` package
 
 * Implementation of specific REST endpoints are located in `com.atmbiz.extensions.rest` package
@@ -24,13 +24,30 @@ To successfully integrate with atm.biz, follow these steps:
 
 2. **Operator Login and Setup**: Once registered, login to your operator account. Setup your account settings at the following URL: [https://atm.biz/dashboard/operator/settings](https://atm.biz/dashboard/operator/settings)
 
-3. **Configuration File Creation**: You'll need to create an `atmbiz` configuration file. This should be placed in the configuration folder of your CAS server, specifically in the `/batm/config/` directory. The content of this file should be as follows:
+3. **Configuration File**: You'll need to create an `atmbiz` configuration file. This should be placed in the configuration folder of your CAS server, specifically in the `/batm/config/` directory. The content of this file will be provided to you and should be as follows:
 
     ```
-    API_KEY=YourAPIKey
-    API_SECRET=YourAPISecret
+      MQ_HOST=https://atm.biz/
+      MQ_PORT=5672
+      MQ_USER=operator
+      MQ_PASSWORD=password
+      MQ_PREFIX=operatorPrefix
     ```
+   **Security considerations** : 
+   
+   You should change the ownership of the configuration file to the user that runs the CAS server. This way, only this user and the root user will have the ability to change the file.
+    ```
+      sudo chown cas_user:cas_group /batm/config/atmbiz
+    ```
+   Replace cas_user with the username and cas_group with the group name that runs the CAS server.
+   Set File Permissions:
 
+   Set the file permissions so that only the owner can read and write to the file, and others cannot access it.
+     ```
+      sudo chmod 600 /batm/config/atmbiz
+     ```
+   This command sets read and write permissions for the owner and no permissions for the group and others.
+   
 4. **Server Commands**: Finally, execute the following commands on your server:
 
     - To stop all services:
@@ -44,6 +61,3 @@ To successfully integrate with atm.biz, follow these steps:
     ```bash
     sudo ./batm-manage start all
     ```
-
-Please replace `YourAPIKey` and `YourAPISecret` with your actual API Key and Secret obtained from atm.biz.
-

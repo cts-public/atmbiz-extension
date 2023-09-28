@@ -32,4 +32,8 @@ public enum TransactionErrorCode {
         }
         return UNKNOWN_ERROR;
     }
+
+    public int getValue() {
+        return value;
+    }
 }

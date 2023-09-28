@@ -1,8 +1,8 @@
 package com.atmbiz.extensions;
 
-import com.atmbiz.extensions.listener.AtmbizTransactionListener;
-import com.atmbiz.extensions.rest.AtmbizRestServices;
-import com.atmbiz.extensions.rest.ServletFilter;
+import com.atmbiz.extensions.controller.AtmbizRestServices;
+import com.atmbiz.extensions.controller.ServletFilter;
+import com.atmbiz.extensions.mq.RPCServer;
 import com.generalbytes.batm.server.extensions.AbstractExtension;
 import com.generalbytes.batm.server.extensions.IExtensionContext;
 import com.generalbytes.batm.server.extensions.IRestService;
@@ -30,7 +30,10 @@ public class AtmbizExtension extends AbstractExtension{
     public void init(IExtensionContext ctx) {
         super.init(ctx);
         this.ctx = ctx;
-        ctx.addTransactionListener(new AtmbizTransactionListener());
+        // init MQ server
+        RPCServer server = new RPCServer();
+        Thread serverThread = new Thread(server);
+        serverThread.start();
     }
 
     @Override

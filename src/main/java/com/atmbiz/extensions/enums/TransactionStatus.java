@@ -5,6 +5,7 @@ public enum TransactionStatus {
     PAYMENT_ARRIVING(1),
     ERROR(2),
     PAYMENT_ARRIVED(3),
+    EXPIRED(4),
     UNKNOWN_STATUS(-1);
 
     private int value;
