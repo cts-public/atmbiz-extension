@@ -18,8 +18,6 @@ import java.util.*;
 public class AtmbizRPCController {
     private static final Logger log = LoggerFactory.getLogger(AtmbizRPCController.class);
 
-    private static final String API_SECRET = AtmbizExtension.getExtensionContext().getConfigProperty("atmbiz", "API_SECRET", "DEFAULT");
-
     public static String terminalsRpc(String oswApiKey) {
         log.info("oswApiKey:"+oswApiKey);
         if (oswApiKey == null || oswApiKey.isEmpty()) {

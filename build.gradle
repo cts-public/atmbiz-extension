@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'com.atmbiz'
-version '1.0-SNAPSHOT'
+version '0.0.1-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -19,6 +19,7 @@ dependencies {
     compile(group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.9.9')
     compile(group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.9')
     compile(group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.9.9')
+    compile(group: 'com.rabbitmq', name: 'amqp-client', version: '5.18.0')
 }
 
 test {
@@ -27,5 +28,5 @@ test {
 
 jar {
     archiveBaseName = 'atmbiz'
-    archiveVersion =  '0.1.0'
+    archiveVersion =  '0.0.1'
 }
