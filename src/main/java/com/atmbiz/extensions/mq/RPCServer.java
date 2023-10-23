@@ -39,7 +39,11 @@ public class RPCServer implements AutoCloseable, Runnable {
         factory.setPort(MQ_PORT);   // e.g., 5672 for default RabbitMQ port
         factory.setUsername(MQ_USER);
         factory.setPassword(MQ_PASSWORD);
+
+
         try {
+            factory.useSslProtocol();
+
             connection = factory.newConnection();
             channel = connection.createChannel();
         } catch (Exception e) {
@@ -74,7 +78,7 @@ public class RPCServer implements AutoCloseable, Runnable {
                 log.error(e.toString());
                 response = "";
             } finally {
-                channel.basicPublish("", outputQueue, replyProps, response.getBytes(StandardCharsets.UTF_8));
+                channel.basicPublish(MQ_PREFIX + "_direct", outputQueue, replyProps, response.getBytes(StandardCharsets.UTF_8));
                 channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
             }
         };
