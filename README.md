@@ -29,9 +29,11 @@ You can either use the script installation method for automated setup or follow 
    ```bash
    wget https://raw.githubusercontent.com/cts-public/atmbiz-extension/main/atmbiz-install.sh
    ```
-   
+2. **Give the script execute permissions**:
+      ```bash
+      chmod +x atmbiz-install.sh
+      ```
 2. **Run the Script**:
-
     ```bash
     ./atmbiz-install.sh
     ```

@@ -37,13 +37,6 @@ MQ_PREFIX=operatorPrefix
 EOF
 print_message 32 "Configuration file created."
 
-# Set Ownership and Permissions for Configuration File
-if sudo chown cas_user:cas_group /batm/config/atmbiz && sudo chmod 600 /batm/config/atmbiz; then
-    print_message 32 "Set ownership and permissions for configuration file."
-else
-    print_message 31 "Failed to set ownership and permissions for configuration file."
-    exit 1
-fi
 
 # Download and Copy the RabbitMQ Java Client Library directly to the desired directory
 if wget -q -O /batm/app/master/lib/amqp-client-5.18.0.jar https://repo1.maven.org/maven2/com/rabbitmq/amqp-client/5.18.0/amqp-client-5.18.0.jar; then
@@ -61,17 +54,30 @@ if [[ $response =~ ^[Yy]$ ]]; then
         print_message 32 "Successfully stopped CAS services."
         sleep 5
         # Start services and wait for "master service started" message
-        sudo /batm/batm-manage start all | while read line; do
-            echo $line
-            if [[ $line == *"master service started"* ]]; then
-                print_message 32 "Master service started."
-                break
-            fi
-        done
+        sudo /batm/batm-manage start all
+ 	      sleep 5
+        print_message 32 "Master service started."
     else
         print_message 31 "Failed to restart CAS services."
         exit 1
     fi
+fi
+
+# Ask the user if they want to stop and start services
+read -p "Do you want set ownership and permissions for configuration file to specific user?  (y/n)" response
+
+if [[ $response =~ ^[Yy]$ ]]; then
+  # Prompt user for their username and group
+  read -p "Please enter your username: " user_name
+  read -p "Please enter your group: " user_group
+
+  # Set Ownership and Permissions for Configuration File
+  if sudo chown $user_name:$user_group /batm/config/atmbiz && sudo chmod 600 /batm/config/atmbiz; then
+      print_message 32 "Set ownership and permissions for configuration file."
+  else
+      print_message 31 "Failed to set ownership and permissions for configuration file."
+      exit 1
+  fi
 fi
 
 print_message 34 "Script completed!"
