@@ -69,7 +69,14 @@ Restart: If prompted, restart the system. Alternatively, you can choose to resta
      /batm/app/master/lib
      ```
 
-3. **Server Commands**:
+3. **Download and Copy the ATM.biz Plugin**:
+    - Download the ATM.biz Plugin from [ATM.biz plugin](https://github.com/cts-public/atmbiz-extension/releases/download/v0.0.2/atmbiz-0.0.2.jar).
+    - Copy the `.jar` library file to:
+      ```bash
+      /batm/app/master/extensions/
+      ```
+
+4. **Server Commands**:
    - To stop all services:
      ```bash
      sudo ./batm-manage stop all

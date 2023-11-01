@@ -20,6 +20,7 @@ public class RPCServer implements AutoCloseable, Runnable {
     private static final String MQ_USER = AtmbizExtension.getExtensionContext().getConfigProperty(ATMBIZ_CONFIG, "MQ_USER", "user");
     private static final String MQ_PASSWORD = AtmbizExtension.getExtensionContext().getConfigProperty(ATMBIZ_CONFIG, "MQ_PASSWORD", "password");
     private static final String MQ_PREFIX = AtmbizExtension.getExtensionContext().getConfigProperty(ATMBIZ_CONFIG,"MQ_PREFIX", "prefix");
+    private static final Boolean MQ_SSL = AtmbizExtension.getExtensionContext().getConfigProperty(ATMBIZ_CONFIG,"MQ_SSL", "true").equals("true");
 
     private static final String TERMINALS_INPUT = MQ_PREFIX + "_terminals_input";
     private static final String TERMINALS_OUTPUT = MQ_PREFIX + "_terminals_output";
@@ -43,8 +44,9 @@ public class RPCServer implements AutoCloseable, Runnable {
         factory.setPassword(MQ_PASSWORD);
 
         try {
-            factory.useSslProtocol();
-
+            if(MQ_SSL) {
+                factory.useSslProtocol();
+            }
             connection = factory.newConnection();
             channel = connection.createChannel();
         } catch (Exception e) {
