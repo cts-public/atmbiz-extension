@@ -33,7 +33,7 @@ MQ_HOST=https://atm.biz/
 MQ_PORT=5671
 MQ_USER=${MQ_USER}
 MQ_PASSWORD=${MQ_PASSWORD}
-MQ_PREFIX=operatorPrefix
+MQ_PREFIX=${MQ_USER}
 EOF
 print_message 32 "Configuration file created."
 
