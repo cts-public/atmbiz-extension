@@ -46,8 +46,8 @@ Restart: If prompted, restart the system. Alternatively, you can choose to resta
 
 1. **Configuration File**: Create an `atmbiz` configuration file in the `/batm/config/` directory. The content should be:
    ```properties
-   MQ_HOST=https://atm.biz/
-   MQ_PORT=5672
+   MQ_HOST=amqp.atm.biz
+   MQ_PORT=5671
    MQ_USER=operator
    MQ_PASSWORD=password
    MQ_PREFIX=operatorPrefix
