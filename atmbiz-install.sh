@@ -29,7 +29,7 @@ echo "" # For better formatting
 
 # Create Configuration File
 cat << EOF > /batm/config/atmbiz
-MQ_HOST=https://atm.biz/
+MQ_HOST=amqp.atm.biz
 MQ_PORT=5671
 MQ_USER=${MQ_USER}
 MQ_PASSWORD=${MQ_PASSWORD}
