@@ -2,6 +2,7 @@ package com.atmbiz.extensions.mq;
 
 import com.atmbiz.extensions.AtmbizExtension;
 import com.atmbiz.extensions.controller.AtmbizRPCController;
+import com.atmbiz.extensions.dao.ErrorMessage;
 import com.rabbitmq.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,11 +13,13 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 
 public class RPCServer implements AutoCloseable, Runnable {
-    private static final String MQ_HOST = AtmbizExtension.getExtensionContext().getConfigProperty("atmbiz", "MQ_HOST", "localhost");
-    private static final int MQ_PORT = Integer.parseInt(AtmbizExtension.getExtensionContext().getConfigProperty("atmbiz", "MQ_PORT", "5672"));
-    private static final String MQ_USER = AtmbizExtension.getExtensionContext().getConfigProperty("atmbiz", "MQ_USER", "user");
-    private static final String MQ_PASSWORD = AtmbizExtension.getExtensionContext().getConfigProperty("atmbiz", "MQ_PASSWORD", "password");
-    private static final String MQ_PREFIX = AtmbizExtension.getExtensionContext().getConfigProperty("atmbiz","MQ_PREFIX", "prefix");
+    private static final String ATMBIZ_CONFIG = "atmbiz";
+
+    private static final String MQ_HOST = AtmbizExtension.getExtensionContext().getConfigProperty(ATMBIZ_CONFIG, "MQ_HOST", "localhost");
+    private static final int MQ_PORT = Integer.parseInt(AtmbizExtension.getExtensionContext().getConfigProperty(ATMBIZ_CONFIG, "MQ_PORT", "5672"));
+    private static final String MQ_USER = AtmbizExtension.getExtensionContext().getConfigProperty(ATMBIZ_CONFIG, "MQ_USER", "user");
+    private static final String MQ_PASSWORD = AtmbizExtension.getExtensionContext().getConfigProperty(ATMBIZ_CONFIG, "MQ_PASSWORD", "password");
+    private static final String MQ_PREFIX = AtmbizExtension.getExtensionContext().getConfigProperty(ATMBIZ_CONFIG,"MQ_PREFIX", "prefix");
 
     private static final String TERMINALS_INPUT = MQ_PREFIX + "_terminals_input";
     private static final String TERMINALS_OUTPUT = MQ_PREFIX + "_terminals_output";
@@ -33,13 +36,11 @@ public class RPCServer implements AutoCloseable, Runnable {
     private Channel channel;
 
     public RPCServer() {
-        log.info(" MQ initialization ");
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(MQ_HOST); // e.g., "localhost" or an IP address
-        factory.setPort(MQ_PORT);   // e.g., 5672 for default RabbitMQ port
+        factory.setHost(MQ_HOST);
+        factory.setPort(MQ_PORT);
         factory.setUsername(MQ_USER);
         factory.setPassword(MQ_PASSWORD);
-
 
         try {
             factory.useSslProtocol();
@@ -70,13 +71,16 @@ public class RPCServer implements AutoCloseable, Runnable {
 
             try {
                 String message = new String(delivery.getBody(), StandardCharsets.UTF_8);
-                log.info("message:"+message);
                 response = function.process(message);
+            } catch (ErrorMessage error){
+                log.error(error.getMessage());
+                log.error(error.toString());
+                response = error.toString();
             } catch (Exception e) {
                 log.error(e.getMessage());
                 log.error(getStackTraceAsString(e));
                 log.error(e.toString());
-                response = "";
+                response = e.toString();
             } finally {
                 channel.basicPublish(MQ_PREFIX + "_direct", outputQueue, replyProps, response.getBytes(StandardCharsets.UTF_8));
                 channel.basicAck(delivery.getEnvelope().getDeliveryTag(), false);
@@ -129,6 +133,6 @@ public class RPCServer implements AutoCloseable, Runnable {
 
     @FunctionalInterface
     private interface ProcessingFunction {
-        String process(String request);
+        String process(String request) throws ErrorMessage;
     }
 }

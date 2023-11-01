@@ -1,29 +1,48 @@
-# **Atmbiz**
-## Project Structure
+# **Atmbiz Integration Guide**
 
-- Project structure consists of `AtmbizExtension` class which is an extension of `com.generalbytes.batm.server.extension.AbstractExtensions` located in the `com.atmbiz.extensions` package.
+Welcome to the Atm.biz integration guide. This document will walk you through the process of successfully integrating with atm.biz in clear and detailed steps.
 
-## Build & Deploy
+## Table of Contents
 
-1. Run `clean`.
-2. Run `tasks/build`.
-3. Copy `build/libs/atmbiz-{VERSION}.jar` on server into folder `/batm/app/master/extensions`.
-4. On the server run command:
+1. [Operator Registration](#operator-registration)
+2. [Plugin Configuration](#plugin-configuration)
+    - [Script Installation](#script-installation)
+    - [Manual Installation](#manual-installation)
+
+## **Operator Registration**
+
+### Step 1: Sign Up
+Register as an operator at [https://atm.biz/operator-sign-up](https://atm.biz/operator-sign-up).
+
+### Step 2: Login & Setup
+After successful registration:
+- Login to your operator account.
+- Set up your account settings at [https://atm.biz/dashboard/operator/settings](https://atm.biz/dashboard/operator/settings).
+
+## **Plugin Configuration**
+
+You can either use the script installation method for automated setup or follow the manual installation steps.
+
+### **Script Installation**
+
+1. **Download Installation Script**: Fetch the script from the following link:
    ```bash
-   sudo ./batm-manage stop all
+   wget https://raw.githubusercontent.com/cts-public/atmbiz-extension/main/atmbiz-install.sh
    ```
-5. On the server run command:
-   ```bash
-   sudo ./batm-manage start all
-   ```
+   
+2. **Run the Script**:
 
-# Atm.biz Integration Procedure
+    ```bash
+    ./atmbiz-install.sh
+    ```
+   
+Provide Credentials: During script execution, you'll be prompted to enter the MQ password and MQ user.
 
-To successfully integrate with atm.biz, follow these steps:
+Restart: If prompted, restart the system. Alternatively, you can choose to restart later.
 
-1. **Operator Registration**: Register as an operator at [https://atm.biz/operator-sign-up](https://atm.biz/operator-sign-up).
-2. **Operator Login and Setup**: Once registered, login to your operator account. Set up your account settings at [https://atm.biz/dashboard/operator/settings](https://atm.biz/dashboard/operator/settings).
-3. **Configuration File**: Create an `atmbiz` configuration file in the `/batm/config/` directory. The content should be:
+### Manual installation 
+
+1. **Configuration File**: Create an `atmbiz` configuration file in the `/batm/config/` directory. The content should be:
    ```properties
    MQ_HOST=https://atm.biz/
    MQ_PORT=5672
@@ -41,14 +60,14 @@ To successfully integrate with atm.biz, follow these steps:
      sudo chmod 600 /batm/config/atmbiz
      ```
 
-4. **Download and Copy the RabbitMQ Java Client Library**:
+2. **Download and Copy the RabbitMQ Java Client Library**:
    - Download the RabbitMQ Java client library from [RabbitMQ Java Client Library](https://repo1.maven.org/maven2/com/rabbitmq/amqp-client/5.18.0/amqp-client-5.18.0.jar).
    - Copy the `.jar` library file to:
      ```bash
      /batm/app/master/lib
      ```
 
-5. **Server Commands**:
+3. **Server Commands**:
    - To stop all services:
      ```bash
      sudo ./batm-manage stop all
