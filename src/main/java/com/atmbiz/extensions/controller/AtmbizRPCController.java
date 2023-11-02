@@ -59,37 +59,33 @@ public class AtmbizRPCController {
         try {
             requestObject = mapper.readValue(message, AtmbizSellCryptoRequest.class);
         } catch (IOException e) {
-            throw new ErrorMessage("error","Invalid request format");
+            throw new ErrorMessage("INVALID_REQUEST_FORMAT","Invalid request format");
         }
 
         // Validate if serialNumber in request object is valid against given api_key
         if (!validateSerialNumber(requestObject.getOswApiKey(), requestObject.getSerialNumber())) {
-            throw new ErrorMessage("error","nvalid Serial Number for the given API Key");
+            throw new ErrorMessage("INVALID_API_KEY_PERMISSION","Invalid Serial Number for the given API Key");
         }
 
-        // Use the JSON string as the input for your HMAC calculation
-        String data;
         try {
-            data = mapper.writeValueAsString(requestObject);
+            log.info("Received sellCrypto request with data: {}",  mapper.writeValueAsString(requestObject));
         } catch (JsonProcessingException e) {
             log.error("Error occurred while processing JSON", e);
-            throw new ErrorMessage("error",e.getMessage(), e);
+            throw new ErrorMessage("INVALID_REQUEST",e.getMessage(), e);
         }
-
-        log.info("Received sellCrypto request with data: {}", data);
 
         // Validate request object
         if (requestObject.getSerialNumber() == null || requestObject.getFiatAmount() == null || requestObject.getFiatCurrency() == null || requestObject.getCryptoAmount() == null || requestObject.getCryptoCurrency() == null) {
-            throw new ErrorMessage("error","Missing properties!");
+            throw new ErrorMessage("INVALID_REQUEST","Missing properties!");
         }
 
         // Create Identity
         IIdentity identity;
         try {
             identity = AtmbizExtension.getExtensionContext().addIdentity(requestObject.getFiatCurrency(), requestObject.getSerialNumber(), null, Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), "note", 4, BigDecimal.ZERO, BigDecimal.ZERO, new Date(), null);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("Error occurred while creating identity", e);
-            throw new ErrorMessage("error","Error during identity creation:" + e.getMessage(), e);
+            throw new ErrorMessage("IDENTITY_CREATE","Error during identity creation:" + e.getMessage(), e);
         }
         // Add phone and email
         try {
@@ -97,25 +93,25 @@ public class AtmbizRPCController {
                 AtmbizExtension.getExtensionContext().addIdentityPiece(identity.getPublicId(), new IdentityPiece(IIdentityPiece.TYPE_CELLPHONE, null, requestObject.getPhoneNumber()));
             if (requestObject.getEmail() != null)
                 AtmbizExtension.getExtensionContext().addIdentityPiece(identity.getPublicId(), new IdentityPiece(IIdentityPiece.TYPE_EMAIL, requestObject.getEmail(), null));
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("Error occurred while updating identity", e);
-            throw new ErrorMessage("error","Error during identity update:" + e.getMessage(), e);
+            throw new ErrorMessage("IDENTITY_UPDATE","Error during identity update:" + e.getMessage(), e);
         }
 
-        BigDecimal avaiableCash = AtmbizExtension.getExtensionContext().calculateCashAvailableForSell(requestObject.getSerialNumber(), requestObject.getFiatCurrency());
-        log.info("Available cash is {}", avaiableCash);
+        BigDecimal availableCash = AtmbizExtension.getExtensionContext().calculateCashAvailableForSell(requestObject.getSerialNumber(), requestObject.getFiatCurrency());
+        log.info("Available cash is {}", availableCash);
 
-        if (avaiableCash.compareTo(requestObject.getFiatAmount()) < 0) {
-            log.error("Not enough cash in ATM, available cash is {}", avaiableCash);
-            throw new ErrorMessage("error","There is no enough cash in ATM, available cash is " + avaiableCash);
+        if (availableCash.compareTo(requestObject.getFiatAmount()) < 0) {
+            log.error("Not enough cash in ATM, available cash is {}", availableCash);
+            throw new ErrorMessage("NOT_ENOUGH_CASH","There is no enough cash in ATM, available cash is " + availableCash);
         }
 
         try {
             SellCryptoResponse response = new SellCryptoResponse(0, AtmbizExtension.getExtensionContext().sellCrypto(requestObject.getSerialNumber(), requestObject.getFiatAmount(), requestObject.getFiatCurrency(), requestObject.getCryptoAmount(), requestObject.getCryptoCurrency(), identity.getPublicId(), requestObject.getDiscountCode() )); // the arguments you were using before
             return mapper.writeValueAsString(response);
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.error("Error occurred while selling crypto", e);
-            throw new ErrorMessage("error",e.getMessage(), e);
+            throw new ErrorMessage("ERROR",e.getMessage(), e);
         }
     }
 
@@ -127,7 +123,7 @@ public class AtmbizRPCController {
         try {
             requestObject = mapper.readValue(message, TransactionInfoRequest.class);
         } catch (IOException e) {
-            return "{\"status\":\"error\",\"message\":\"Invalid request format\"}";
+            throw new ErrorMessage("INVALID_REQUEST",e.getMessage(), e);
         }
 
         try {
@@ -137,7 +133,7 @@ public class AtmbizRPCController {
 
                 if(terminals == null || terminals.isEmpty()){
                     log.error("No terminals assigned to API key");
-                    throw new ErrorMessage("error","No terminals assigned to API key");
+                    throw new ErrorMessage("INVALID_API_KEY_PERMISSION","No terminals assigned to API key");
                 }
 
                 List<Transaction> responseList = new ArrayList<>();
@@ -153,12 +149,12 @@ public class AtmbizRPCController {
                     TransactionInfoResponse response = new TransactionInfoResponse();
                     response.setTransactions(responseList);
                     return mapper.writeValueAsString(response);
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     log.error("Error occurred while getting information about transactions", e);
-                    throw new ErrorMessage("error",e.getMessage(), e);
+                    throw new ErrorMessage("ERROR",e.getMessage(), e);
                 }
             } else {
-                throw new ErrorMessage("error","Unauthorized response: Invalid API key");
+                throw new ErrorMessage("INVALID_API_KEY","Unauthorized response: Invalid API key");
             }
         } catch (Exception e) {
             log.error("Error", e);

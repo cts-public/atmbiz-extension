@@ -1,27 +1,27 @@
 package com.atmbiz.extensions.dao;
 
 public class ErrorMessage extends Exception{
-    private String status;
+    private String code;
     private String message;
 
-    public ErrorMessage(String status, String message) {
+    public ErrorMessage(String code, String message) {
         super(message);
-        this.status = status;
+        this.code = code;
         this.message = message;
     }
 
-    public ErrorMessage(String status, String message, Throwable e) {
+    public ErrorMessage(String code, String message, Throwable e) {
         super(message, e);
-        this.status = status;
+        this.code = code;
         this.message = message;
     }
 
-    public String getStatus() {
-        return status;
+    public String getCode() {
+        return code;
     }
 
-    public void setStatus(String status) {
-        this.status = status;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getMessage() {
@@ -35,7 +35,7 @@ public class ErrorMessage extends Exception{
     @Override
     public String toString() {
         return "{"
-                + "\"status\": \"" + status + "\","
+                + "\"code\": \"" + code + "\","
                 + "\"message\": \"" + message + "\""
                 + "}";
     }
