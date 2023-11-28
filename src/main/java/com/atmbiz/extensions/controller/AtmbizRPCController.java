@@ -139,7 +139,18 @@ public class AtmbizRPCController {
                 List<Transaction> responseList = new ArrayList<>();
 
                 for(String id: requestObject.getTransactionIds()){
-                    ITransactionDetails details = AtmbizExtension.getExtensionContext().findTransactionByTransactionId(id);
+                    ITransactionDetails details;
+                    try {
+                        details = AtmbizExtension.getExtensionContext().findTransactionByTransactionId(id);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        log.error("Exception occured for this transaction id " + id);
+                        continue;
+                    }
+                    if(details == null){
+                        log.error("No details found for this transaction id " + id);
+                        continue;
+                    }
                     if(terminals.contains(details.getTerminalSerialNumber())){
                         responseList.add(getTransaction(details));
                     }
@@ -150,6 +161,7 @@ public class AtmbizRPCController {
                     response.setTransactions(responseList);
                     return mapper.writeValueAsString(response);
                 } catch (Exception e) {
+                    e.printStackTrace();
                     log.error("Error occurred while getting information about transactions", e);
                     throw new ErrorMessage("ERROR",e.getMessage(), e);
                 }

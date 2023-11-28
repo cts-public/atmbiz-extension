@@ -2,6 +2,7 @@ package com.atmbiz.extensions.utils;
 
 import com.atmbiz.extensions.AtmbizExtension;
 import com.atmbiz.extensions.dao.AtmbizTerminal;
+import com.atmbiz.extensions.dao.Fees;
 import com.atmbiz.extensions.dao.OpeningHours;
 import com.generalbytes.batm.server.extensions.IAmountWithDiscount;
 import com.generalbytes.batm.server.extensions.ICryptoConfiguration;
@@ -12,10 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class TransformUtils {
@@ -41,7 +39,6 @@ public final class TransformUtils {
         atmBizTerminal.setDeleted(terminal.isDeleted());
         atmBizTerminal.setErrors(terminal.getErrors());
         atmBizTerminal.setConnectedAt(terminal.getConnectedAt());
-        atmBizTerminal.setAllowedCryptoCurrencies(terminal.getAllowedCryptoCurrencies());
         atmBizTerminal.setExchangeRatesBuy(terminal.getExchangeRatesBuy());
         atmBizTerminal.setExchangeRatesSell(terminal.getExchangeRatesSell());
         atmBizTerminal.setLocation(terminal.getLocation());
@@ -71,17 +68,55 @@ public final class TransformUtils {
 
     private static void setCryptoConfigurationsAndAmounts(ITerminal terminal, AtmbizTerminal atmBizTerminal) {
         List<ICryptoConfiguration> cryptoConfiguration = AtmbizExtension.getExtensionContext().findCryptoConfigurationsByTerminalSerialNumbers(Arrays.asList(terminal.getSerialNumber()));
-        atmBizTerminal.setCryptoConfigurations(cryptoConfiguration);
+        List<Fees> feesList = getFees(cryptoConfiguration);
+        atmBizTerminal.setFees(feesList);
 
         log.warn(terminal.getSerialNumber());
-        log.warn(terminal.getAllowedCryptoCurrencies().toString());
         try {
             Map<String, IAmountWithDiscount> cryptoAmounts = AtmbizExtension.getExtensionContext().calculateCryptoAmounts(terminal.getSerialNumber(), terminal.getAllowedCryptoCurrencies(), BigDecimal.valueOf(1000), terminal.getAllowedCashCurrencies().get(0), 4, null, null);
-            atmBizTerminal.setCryptoAmounts(cryptoAmounts);
-            atmBizTerminal.setCryptoAmountsStatus("LOADED");
+            for (Map.Entry<String, IAmountWithDiscount> entry : cryptoAmounts.entrySet()) {
+                String cryptoCurrency = entry.getKey();
+                IAmountWithDiscount amountWithDiscount = entry.getValue();
+                for (Fees fee : feesList) {
+                    if (cryptoCurrency.equals(fee.getCryptoCurrency())) {
+                        fee.setFixedTransactionFee(amountWithDiscount.getFixedTransactionFee());
+                        break; // Break if the fees list has unique crypto currency entries
+                    }
+                }
+            }
         } catch (Exception e) {
             atmBizTerminal.setCryptoAmountsStatus("FAILED_TO_LOAD");
         }
+
+        getAllowedCryptoCurrenciesForBuy(cryptoConfiguration,atmBizTerminal);
+    }
+
+
+    private static void getAllowedCryptoCurrenciesForBuy(List<ICryptoConfiguration> configurations, AtmbizTerminal atmBizTerminal){
+        List<String> forWithdraw = new ArrayList<>();
+        List<String> forBuy = new ArrayList<>();
+        for(ICryptoConfiguration configuration: configurations){
+            if(configuration.getSellExchangeStrategy() != 0){
+                forWithdraw.add(configuration.getCryptoCurrency());
+            }
+            if(configuration.getBuyExchangeStrategy() != -1){
+                forBuy.add(configuration.getCryptoCurrency());
+            }
+        }
+        atmBizTerminal.setAllowedCryptoCurrenciesForBuy(forBuy);
+        atmBizTerminal.setAllowedCryptoCurrencies(forWithdraw);
+    }
+
+    private static List<Fees> getFees(List<ICryptoConfiguration> cryptoConfiguration) {
+        List<Fees> fees = new ArrayList<>();
+        for(ICryptoConfiguration cryptoConfiguration1: cryptoConfiguration){
+            Fees fee = new Fees();
+            fee.setBuyFeePercentage(cryptoConfiguration1.getProfitBuy());
+            fee.setSellFeePercentage(cryptoConfiguration1.getProfitSell());
+            fee.setCryptoCurrency(cryptoConfiguration1.getCryptoCurrency());
+            fees.add(fee);
+        }
+        return fees;
     }
 
     private static void setBanknotes(ITerminal terminal, AtmbizTerminal atmBizTerminal) {

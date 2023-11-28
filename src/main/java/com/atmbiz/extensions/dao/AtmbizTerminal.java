@@ -2,7 +2,6 @@ package com.atmbiz.extensions.dao;
 
 
 import com.generalbytes.batm.server.extensions.IAmountWithDiscount;
-import com.generalbytes.batm.server.extensions.ICryptoConfiguration;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -28,7 +27,8 @@ public class AtmbizTerminal {
     int rejectedReason;
     List<String> allowedCashCurrencies;
     List<String> allowedCryptoCurrencies;
-    List<ICryptoConfiguration> cryptoConfigurations;
+    List<String> allowedCryptoCurrenciesForBuy;
+    List<Fees> fees;
     List<OpeningHours> openingHours;
     Map<String, IAmountWithDiscount> cryptoAmounts;
     String cryptoAmountsStatus;
@@ -186,12 +186,12 @@ public class AtmbizTerminal {
         this.openingHours = openingHours;
     }
 
-    public List<ICryptoConfiguration> getCryptoConfigurations() {
-        return cryptoConfigurations;
+    public List<Fees> getFees() {
+        return fees;
     }
 
-    public void setCryptoConfigurations(List<ICryptoConfiguration> cryptoConfigurations) {
-        this.cryptoConfigurations = cryptoConfigurations;
+    public void setFees(List<Fees> fees) {
+        this.fees = fees;
     }
 
     public Map<String, IAmountWithDiscount> getCryptoAmounts() {
@@ -216,5 +216,13 @@ public class AtmbizTerminal {
 
     public void setBanknotes(Map<String, Map<BigDecimal, Integer>> banknotes) {
         this.banknotes = banknotes;
+    }
+
+    public List<String> getAllowedCryptoCurrenciesForBuy() {
+        return allowedCryptoCurrenciesForBuy;
+    }
+
+    public void setAllowedCryptoCurrenciesForBuy(List<String> allowedCryptoCurrenciesForBuy) {
+        this.allowedCryptoCurrenciesForBuy = allowedCryptoCurrenciesForBuy;
     }
 }
